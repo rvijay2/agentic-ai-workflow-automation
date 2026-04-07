@@ -1,4 +1,5 @@
 import express from 'express';
+import { rateLimit } from 'express-rate-limit';
 import * as path from 'path';
 import * as fs from 'fs';
 import { createBlackboard, setPlan } from '../agent/blackboard';
@@ -8,33 +9,18 @@ import { executePlan } from '../agent/executor';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Simple in-memory rate limiter
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-function rateLimit(maxRequests: number, windowMs: number) {
-  return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
-    const ip = req.ip ?? 'unknown';
-    const now = Date.now();
-    const entry = rateLimitMap.get(ip);
-    if (!entry || now > entry.resetAt) {
-      rateLimitMap.set(ip, { count: 1, resetAt: now + windowMs });
-      next();
-    } else if (entry.count < maxRequests) {
-      entry.count++;
-      next();
-    } else {
-      res.status(429).json({ error: 'Too many requests' });
-    }
-  };
-}
+const apiRunLimiter = rateLimit({ windowMs: 60_000, max: 10 });
+const apiRunsLimiter = rateLimit({ windowMs: 60_000, max: 30 });
+const staticLimiter = rateLimit({ windowMs: 60_000, max: 60 });
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (_req, res) => {
+app.get('/', staticLimiter, (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.post('/api/run', rateLimit(10, 60_000), async (req, res) => {
+app.post('/api/run', apiRunLimiter, async (req, res) => {
   const { request } = req.body as { request: string };
   if (!request) {
     res.status(400).json({ error: 'request is required' });
@@ -57,7 +43,7 @@ app.post('/api/run', rateLimit(10, 60_000), async (req, res) => {
   });
 });
 
-app.get('/api/runs', rateLimit(30, 60_000), (_req, res) => {
+app.get('/api/runs', apiRunsLimiter, (_req, res) => {
   const runsDir = path.join(process.cwd(), 'runs');
   if (!fs.existsSync(runsDir)) { res.json([]); return; }
   const files = fs.readdirSync(runsDir).filter(f => f.endsWith('.json'));
