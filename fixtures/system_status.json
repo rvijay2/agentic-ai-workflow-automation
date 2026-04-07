@@ -1,0 +1,12 @@
+{
+  "status": "degraded",
+  "timestamp": "2024-01-10T06:00:00Z",
+  "services": {
+    "api-gateway": { "status": "degraded", "errorRate": 18.7, "p99LatencyMs": 3241 },
+    "payment-service": { "status": "down", "errorRate": 100, "circuitBreaker": "open" },
+    "db-primary": { "status": "down", "reason": "ECONNREFUSED" },
+    "db-replica": { "status": "up", "replicationLag": 45 }
+  },
+  "activeIncidents": ["INC-2024-0042"],
+  "onCallEngineer": "alice@company.com"
+}

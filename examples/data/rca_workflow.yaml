@@ -1,0 +1,75 @@
+name: incident-rca
+version: "1.0"
+description: Automated incident root cause analysis workflow
+
+inputs:
+  log_file:
+    type: string
+    default: examples/data/logs/system.log
+  metrics_file:
+    type: string
+    default: examples/data/incident_metrics.csv
+
+steps:
+  - id: ingest_logs
+    name: Search and Ingest System Logs
+    tool: doc_search
+    args:
+      query: "error critical failure connection timeout OOM"
+      topK: 10
+      corpus: logs
+
+  - id: search_runbooks
+    name: Search Runbooks for Known Patterns
+    tool: doc_search
+    args:
+      query: "mitigation connection pool exhausted OOM circuit breaker"
+      topK: 5
+    dependsOn:
+      - ingest_logs
+
+  - id: profile_metrics
+    name: Profile Incident Metrics
+    tool: csv_profile
+    args:
+      file: examples/data/incident_metrics.csv
+      zScoreThreshold: 2.0
+    dependsOn: []
+
+  - id: extract_rca
+    name: Extract Root Cause Analysis
+    tool: doc_qa
+    args:
+      question: "What caused the service outage and what were the mitigation steps?"
+      topK: 5
+    dependsOn:
+      - search_runbooks
+
+  - id: fetch_status
+    name: Fetch System Status
+    tool: http_fetch
+    args:
+      url: "http://localhost/fixtures/system_status.json"
+    dependsOn: []
+
+  - id: render_rca
+    name: Render RCA Report
+    tool: report_render
+    args:
+      title: "Incident Root Cause Analysis Report"
+      sections:
+        - log_analysis
+        - runbook_findings
+        - metrics_profile
+        - rca_summary
+        - timeline
+      outputFile: rca_report
+    dependsOn:
+      - ingest_logs
+      - search_runbooks
+      - profile_metrics
+      - extract_rca
+      - fetch_status
+
+outputs:
+  report: render_rca.reportPath

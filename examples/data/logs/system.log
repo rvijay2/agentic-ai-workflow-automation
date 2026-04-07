@@ -1,0 +1,14 @@
+2024-01-10T04:58:23.112Z [ERROR] api-gateway: Connection pool exhausted: waiting for available connection (pool=db-primary, size=50/50)
+2024-01-10T04:58:24.445Z [WARN]  api-gateway: Slow query detected: SELECT * FROM orders WHERE customer_id=? (latency=2341ms)
+2024-01-10T04:59:11.001Z [ERROR] api-gateway: Downstream timeout: payment-service did not respond within 5000ms
+2024-01-10T05:00:01.882Z [CRITICAL] api-gateway: Error rate exceeded threshold: 12.4% (threshold=5%)
+2024-01-10T05:00:02.003Z [ERROR] api-gateway: OOMKilled: pod api-gateway-7d9f8b-xk2p1 exceeded memory limit 2Gi
+2024-01-10T05:01:15.334Z [ERROR] api-gateway: Failed to connect to db-primary: ECONNREFUSED 10.0.1.45:5432
+2024-01-10T05:01:16.005Z [INFO]  api-gateway: Attempting failover to db-replica: 10.0.1.46:5432
+2024-01-10T05:01:18.221Z [INFO]  api-gateway: Failover successful: now connected to db-replica
+2024-01-10T05:02:00.000Z [WARN]  api-gateway: Circuit breaker OPEN for payment-service (failure rate=68%)
+2024-01-10T05:15:00.000Z [ERROR] api-gateway: 3 pod restarts detected in last 10 minutes - escalating to on-call
+2024-01-10T06:00:01.112Z [CRITICAL] api-gateway: SLO breach: error rate 18.7% for 60 consecutive minutes
+2024-01-10T07:45:00.000Z [INFO]  api-gateway: Deployment rollback initiated: api-gateway v2.4.1 -> v2.3.8
+2024-01-10T07:52:00.000Z [INFO]  api-gateway: Rollback complete. Error rate recovering: 8.2% -> 2.1%
+2024-01-10T09:00:00.000Z [INFO]  api-gateway: System stable. Error rate: 0.4%. Incident resolved.

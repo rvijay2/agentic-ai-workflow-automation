@@ -1,0 +1,65 @@
+name: customer-churn-intervention
+version: "1.0"
+description: Automated customer churn detection and intervention workflow
+
+inputs:
+  csv_file:
+    type: string
+    default: examples/data/customers.csv
+  z_score_threshold:
+    type: number
+    default: 2.0
+
+steps:
+  - id: profile_csv
+    name: Profile Customer Data
+    tool: csv_profile
+    args:
+      file: examples/data/customers.csv
+      zScoreThreshold: 2.0
+
+  - id: search_retention
+    name: Search Retention Policies
+    tool: doc_search
+    args:
+      query: "churn retention policy high risk customer action"
+      topK: 5
+    dependsOn:
+      - profile_csv
+
+  - id: qa_policies
+    name: Extract Retention Actions
+    tool: doc_qa
+    args:
+      question: "What are the recommended actions for high churn risk customers?"
+      topK: 3
+    dependsOn:
+      - search_retention
+
+  - id: validate_segments
+    name: Validate Customer Segments
+    tool: json_schema_infer
+    args:
+      file: examples/data/customer_segments.json
+    dependsOn: []
+
+  - id: render_action_plan
+    name: Render Churn Action Plan
+    tool: report_render
+    args:
+      title: "Customer Churn Action Plan"
+      sections:
+        - csv_profile
+        - anomaly_highlights
+        - retention_policies
+        - action_items
+      outputFile: churn_action_plan
+    dependsOn:
+      - profile_csv
+      - search_retention
+      - qa_policies
+      - validate_segments
+
+outputs:
+  report: render_action_plan.reportPath
+  anomalyCount: profile_csv.anomalyCount

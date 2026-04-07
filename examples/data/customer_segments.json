@@ -1,0 +1,38 @@
+{
+  "segments": [
+    {
+      "id": "seg-001",
+      "name": "High-Value Enterprise",
+      "criteria": {
+        "minMonthlyRevenue": 10000,
+        "minTenureMonths": 12,
+        "npsMin": 7
+      },
+      "churnRisk": "low",
+      "retentionAction": "proactive_success"
+    },
+    {
+      "id": "seg-002",
+      "name": "At-Risk Growth",
+      "criteria": {
+        "usageDropPercent": 30,
+        "ticketsPerMonth": 5,
+        "daysSinceLogin": 45
+      },
+      "churnRisk": "high",
+      "retentionAction": "immediate_outreach"
+    },
+    {
+      "id": "seg-003",
+      "name": "Dormant Starter",
+      "criteria": {
+        "daysSinceLogin": 90,
+        "maxMonthlyRevenue": 1000
+      },
+      "churnRisk": "critical",
+      "retentionAction": "win_back_campaign"
+    }
+  ],
+  "lastUpdated": "2024-01-10",
+  "version": "1.4"
+}

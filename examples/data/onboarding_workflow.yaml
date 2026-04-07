@@ -1,0 +1,58 @@
+name: new-hire-onboarding
+version: "1.0"
+description: Automate the standard new hire onboarding process
+
+inputs:
+  employee_email:
+    type: string
+    required: true
+  start_date:
+    type: string
+    required: true
+  department:
+    type: string
+    default: "Engineering"
+
+steps:
+  - id: search_policies
+    name: Search HR and IT Policies
+    tool: doc_search
+    args:
+      query: "onboarding checklist required steps access"
+      topK: 5
+
+  - id: validate_config
+    name: Validate Employee JSON Config
+    tool: json_schema_infer
+    args:
+      file: examples/data/employee_config.json
+    dependsOn: []
+
+  - id: extract_checklist
+    name: Extract Onboarding Checklist
+    tool: doc_qa
+    args:
+      question: "What are all the required steps for onboarding a new hire?"
+      topK: 5
+    dependsOn:
+      - search_policies
+
+  - id: generate_report
+    name: Generate Onboarding Report
+    tool: report_render
+    args:
+      title: "New Hire Onboarding Report"
+      sections:
+        - onboarding_checklist
+        - config_validation
+        - it_setup
+        - hr_docs
+      outputFile: onboarding_report
+    dependsOn:
+      - search_policies
+      - validate_config
+      - extract_checklist
+
+outputs:
+  report: generate_report.reportPath
+  checklist: extract_checklist.snippets
