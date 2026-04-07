@@ -18,7 +18,6 @@
 6. [Three End-to-End Scenarios](#three-end-to-end-scenarios)
 7. [Run with Docker](#run-with-docker)
 8. [Environment Variables](#environment-variables)
-9. [Interview Writeup](#interview-writeup)
 
 ---
 
