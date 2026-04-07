@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic AI Workflow Automation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+    header { background: linear-gradient(135deg, #1f6feb, #388bfd); padding: 20px 40px; }
+    header h1 { font-size: 1.8rem; font-weight: 700; }
+    header p { color: #cdf; font-size: 0.95rem; margin-top: 4px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+    .scenarios { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .scenario-btn { background: #21262d; border: 1px solid #30363d; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; text-align: left; }
+    .scenario-btn:hover { border-color: #388bfd; background: #1f2937; }
+    .scenario-btn .icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .scenario-btn h3 { font-size: 1rem; color: #e6edf3; margin-bottom: 4px; }
+    .scenario-btn p { font-size: 0.8rem; color: #8b949e; }
+    textarea { width: 100%; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; color: #e6edf3; padding: 12px; font-size: 0.95rem; resize: vertical; min-height: 80px; }
+    button.run-btn { background: #238636; color: white; border: none; border-radius: 8px; padding: 12px 28px; font-size: 1rem; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
+    button.run-btn:hover { background: #2ea043; }
+    button.run-btn:disabled { background: #484f58; cursor: not-allowed; }
+    .loader { display: none; align-items: center; gap: 8px; color: #8b949e; margin-top: 10px; }
+    .loader.active { display: flex; }
+    .spinner { width: 18px; height: 18px; border: 2px solid #30363d; border-top: 2px solid #388bfd; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .results { display: none; }
+    .results.active { display: block; }
+    .step-list { list-style: none; }
+    .step-item { padding: 10px 14px; margin-bottom: 8px; background: #0d1117; border-radius: 8px; border-left: 3px solid #30363d; font-size: 0.88rem; }
+    .step-item.success { border-left-color: #2ea043; }
+    .step-item.failed { border-left-color: #da3633; }
+    .step-item .tool-badge { background: #1f6feb33; color: #58a6ff; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; margin-left: 8px; }
+    .report-box { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 16px; max-height: 500px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; font-size: 0.82rem; line-height: 1.6; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .status-success { background: #2ea04333; color: #3fb950; }
+    .status-failed { background: #da363333; color: #f85149; }
+    .citations { font-size: 0.8rem; color: #8b949e; }
+    .citations li { margin-bottom: 4px; }
+    h2 { font-size: 1.15rem; margin-bottom: 16px; color: #e6edf3; }
+    h3 { font-size: 0.95rem; color: #8b949e; margin-bottom: 8px; }
+    .meta { font-size: 0.8rem; color: #8b949e; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🤖 Agentic AI Workflow Automation</h1>
+  <p>Multi-tool, multi-step agent with offline demo mode • Plans → Executes → Cites Sources</p>
+</header>
+<div class="container">
+  <div class="card">
+    <h2>Choose a Scenario or Enter Your Request</h2>
+    <div class="scenarios">
+      <button class="scenario-btn" onclick="setPrompt('Onboard a new hire: read docs, generate checklist, validate JSON config, produce report')">
+        <div class="icon">👤</div>
+        <h3>New Hire Onboarding</h3>
+        <p>Read docs → validate config → generate checklist → report</p>
+      </button>
+      <button class="scenario-btn" onclick="setPrompt('Incident RCA assistant: ingest system logs, search runbooks, compute error metrics, draft root cause analysis report')">
+        <div class="icon">🔴</div>
+        <h3>Incident RCA Assistant</h3>
+        <p>Ingest logs → search runbooks → compute metrics → draft RCA</p>
+      </button>
+      <button class="scenario-btn" onclick="setPrompt('Customer churn investigation: profile CSV data, detect anomalies, find retention policy snippets, produce action plan')">
+        <div class="icon">📊</div>
+        <h3>Customer Churn Investigation</h3>
+        <p>Profile CSV → detect anomalies → policy search → action plan</p>
+      </button>
+    </div>
+    <textarea id="request" placeholder="Enter your request..."></textarea>
+    <br>
+    <button class="run-btn" onclick="runAgent()">&#9654; Run Agent</button>
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <span>Agent is planning and executing...</span>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="card">
+      <h2>Run Summary</h2>
+      <div id="run-meta" class="meta"></div>
+      <h3>Steps Executed</h3>
+      <ul class="step-list" id="step-list"></ul>
+    </div>
+    <div class="card">
+      <h2>Generated Report</h2>
+      <div class="report-box" id="report-box"></div>
+    </div>
+    <div class="card">
+      <h2>Citations</h2>
+      <ul class="citations" id="citations-list"></ul>
+    </div>
+  </div>
+</div>
+<script>
+function setPrompt(text) {
+  document.getElementById('request').value = text;
+}
+
+async function runAgent() {
+  const request = document.getElementById('request').value.trim();
+  if (!request) return alert('Please enter a request');
+
+  document.getElementById('loader').classList.add('active');
+  document.getElementById('results').classList.remove('active');
+  document.querySelector('.run-btn').disabled = true;
+
+  try {
+    const resp = await fetch('/api/run', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ request }),
+    });
+    const data = await resp.json();
+    displayResults(data);
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    document.getElementById('loader').classList.remove('active');
+    document.querySelector('.run-btn').disabled = false;
+  }
+}
+
+function displayResults(data) {
+  const statusClass = data.status === 'success' ? 'status-success' : 'status-failed';
+  document.getElementById('run-meta').innerHTML =
+    '<span class="status-badge ' + statusClass + '">' + data.status + '</span>  Run ID: ' + data.runId + '  |  Steps: ' + data.stepResults.filter(function(r) { return r.success; }).length + '/' + data.stepResults.length + ' succeeded';
+
+  const stepList = document.getElementById('step-list');
+  stepList.innerHTML = data.stepResults.map(function(r) {
+    return '<li class="step-item ' + (r.success ? 'success' : 'failed') + '">' +
+      (r.success ? '✅' : '❌') + ' <strong>' + r.stepId + '</strong>' +
+      '<span class="tool-badge">' + r.toolName + '</span>' +
+      r.durationMs + 'ms' + (r.retries > 0 ? ' | ' + r.retries + ' retries' : '') +
+      (!r.success ? '<br><span style="color:#f85149">' + r.error + '</span>' : '') +
+      '</li>';
+  }).join('');
+
+  document.getElementById('report-box').textContent = data.finalReport || 'No report generated';
+
+  const citeList = document.getElementById('citations-list');
+  citeList.innerHTML = (data.citations || []).slice(0, 8).map(function(c, i) {
+    return '<li>[' + (i+1) + '] <strong>' + c.source + '</strong>: ' + (c.excerpt || '').slice(0, 100) + '</li>';
+  }).join('');
+
+  document.getElementById('results').classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "type": "onboarding",
+  "status": "active",
+  "availableTemplates": ["standard", "engineering", "sales", "executive"]
+}

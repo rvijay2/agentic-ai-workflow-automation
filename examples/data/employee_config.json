@@ -1,0 +1,35 @@
+{
+  "employee": {
+    "id": "EMP-2024-001",
+    "name": "Alex Johnson",
+    "email": "alex.johnson@company.com",
+    "department": "Engineering",
+    "startDate": "2024-01-15",
+    "role": "Software Engineer",
+    "level": "L4",
+    "manager": "sarah.smith@company.com",
+    "location": "Chicago, IL",
+    "remote": true,
+    "accessLevel": "standard"
+  },
+  "it_setup": {
+    "laptopProvisioned": false,
+    "vpnConfigured": false,
+    "emailActivated": true,
+    "codeRepoAccess": false,
+    "securityTrainingComplete": false
+  },
+  "hr_documentation": {
+    "offerLetterSigned": true,
+    "i9Complete": false,
+    "w4Submitted": true,
+    "ndaSigned": false,
+    "directDepositSetup": false
+  },
+  "onboarding": {
+    "buddy": "mike.chen@company.com",
+    "checklistVersion": "v2.3",
+    "completionTarget": "2024-01-29",
+    "progressPercent": 25
+  }
+}

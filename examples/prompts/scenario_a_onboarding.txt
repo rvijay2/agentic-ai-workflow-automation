@@ -1,0 +1,1 @@
+Onboard a new hire: read docs, generate checklist, validate JSON config, produce report
